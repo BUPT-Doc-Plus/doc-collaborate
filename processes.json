@@ -1,0 +1,10 @@
+{
+    "apps": [{
+        "name": "monkeydoc-sharedb",
+        "script": "server.js",
+        "cwd": "./",
+        "error_file": "error.log",
+        "out_file": "out.log",
+        "log_date_format": "YYYY-MM-DD HH:mm Z"
+    }]
+}
