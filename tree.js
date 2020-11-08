@@ -1,6 +1,7 @@
 const config = require('./server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const redis = require('redis');
+const { sortTree } = require('./utils');
 
 // 客户端引用计数
 const clients = {};
@@ -22,13 +23,12 @@ function tree(backend, connection, ws, type, userId) {
         if (err) {
             throw err;
         }
-        console.log(doc.data);
         if (doc.type !== null) {
             console.log(`[Loading] ${type} tree of user ${userId} loaded from memory`);
             backend.listen(new WebSocketJSONStream(ws));
         } else {
             // 新建树
-            console.log(`[Loading] redis missing, create new ${type} tree of user ${userId}`);
+            console.log(`[Loading] memory missing, create new ${type} tree of user ${userId}`);
             let mockTree = {
                 children: [
                     {
@@ -49,13 +49,17 @@ function tree(backend, connection, ws, type, userId) {
                         collaborators: null,
                         show: false,
                         children: [
-                            { id: 5, label: "TCP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
-                            { id: 6, label: "HTTP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                            {
+                                id: 7, label: "七层协议", creator: 1, collaborators: null, show: false, children: [
+                                    { id: 5, label: "TCP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                                    { id: 6, label: "HTTP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                                ]
+                            }
                         ]
                     },
                 ]
             };
-            console.log(mockTree);
+            mockTree.children = sortTree(mockTree.children);
             doc.create(mockTree, function () {
                 console.log(`[Loading] new ${type} tree of user ${userId} created`);
                 backend.listen(new WebSocketJSONStream(ws));
