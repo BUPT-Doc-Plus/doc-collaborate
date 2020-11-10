@@ -3,10 +3,6 @@ module.exports = {
         host: '0.0.0.0',
         port: 8088
     },
-    lb: {
-        host: '0.0.0.0',
-        port: 8088
-    },
     redis: {
         host: 'www.liadrinz.cn',
         port: 6379,
