@@ -96,6 +96,7 @@ class DocFileSystem {
         }
         if (this.get(rcyPath).children[target] === undefined) {
             this.get(rcyPath).children[target] = [];
+            this.tree.indices[rcyPath + target] = this.get(rcyPath).children[target];
         } 
         this.get(rcyPath).children[target].push(this.get(path));
         delete this.get(parent).children[target];
@@ -105,19 +106,22 @@ class DocFileSystem {
 
     restore(path, i) {
         if (this.get(path) === undefined)
-            return false;
+            return -1;
+        let flag = 0;
         let trash = this.get(path)[i];
-        let [rcyPath, _] = DocFileSystem.splitLast(trash.path);
+        let [rcyPath, _] = DocFileSystem.splitLast(path);
         let [oldPath, target] = DocFileSystem.splitLast(trash.path);
         this.mkdir(oldPath);
         this.get(oldPath).children[target] = trash;
-        this.tree.indices[oldPath] = trash;
+        if (this.tree.indices[oldPath + target] !== undefined)
+            flag = 1;
+        this.tree.indices[oldPath + target] = trash;
         this.get(rcyPath).children[target].splice(i, 1);
         if (this.get(rcyPath).children[target].length === 0) {
             delete this.get(rcyPath).children[target];
             delete this.tree.indices[rcyPath];
         }
-        return true;
+        return flag;
     }
 
     remove(path) {

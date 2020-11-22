@@ -97,7 +97,7 @@ describe("Doc File System API Test", () => {
             docFileSystem.recycle("/testFile");
             docFileSystem.touch("/", { label: "testFile" });
             docFileSystem.recycle("/testFile");
-            assert(docFileSystem.restore("/$recycleBin/testFile", 0));
+            assert(docFileSystem.restore("/$recycleBin/testFile", 0) == 0);
             assert(docFileSystem.get("/testFile") !== undefined);
         })
     })
