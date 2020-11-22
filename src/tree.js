@@ -1,4 +1,4 @@
-const config = require('./server.config');
+const config = require('../server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const redis = require('redis');
 const { sortTree } = require('./utils');
@@ -29,38 +29,38 @@ function tree(backend, connection, ws, type, userId) {
         } else {
             // 新建树
             console.log(`[Loading] memory missing, create new ${type} tree of user ${userId}`);
-            let mockTree = {
-                children: [
-                    {
+            let root = {
+                children: {
+                    "算法": {
                         id: 1,
                         label: "算法",
                         creator: 1,
                         collaborators: null,
                         show: false,
-                        children: [
-                            { id: 2, label: "动态规划", type: "rich-text", creator: 1, collaborators: [2, 3] },
-                            { id: 3, label: "二叉树", type: "rich-text", creator: 1, collaborators: [2, 3] },
-                        ]
+                        children: {
+                            "动态规划": { id: 2, label: "动态规划", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                            "二叉树": { id: 3, label: "二叉树", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                        }
                     },
-                    {
+                    "计算机网络": {
                         id: 4,
                         label: "计算机网络",
                         creator: 1,
                         collaborators: null,
                         show: false,
-                        children: [
-                            {
-                                id: 7, label: "七层协议", creator: 1, collaborators: null, show: false, children: [
-                                    { id: 5, label: "TCP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
-                                    { id: 6, label: "HTTP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
-                                ]
+                        children: {
+                            "七层协议": {
+                                id: 7, label: "七层协议", creator: 1, collaborators: null, show: false, children: {
+                                    "TCP协议": { id: 5, label: "TCP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                                    "HTTP协议": { id: 6, label: "HTTP协议", type: "rich-text", creator: 1, collaborators: [2, 3] },
+                                }
                             }
-                        ]
-                    },
-                ]
-            };
-            mockTree.children = sortTree(mockTree.children);
-            doc.create(mockTree, function () {
+                        }
+                    }
+                }
+            }
+            sortTree(root);
+            doc.create(root, function () {
                 console.log(`[Loading] new ${type} tree of user ${userId} created`);
                 backend.listen(new WebSocketJSONStream(ws));
             });

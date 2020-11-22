@@ -6,8 +6,8 @@ const richText = require('rich-text');
 const WebSocket = require('ws');
 const axios = require('axios').default;
 const Delta = require('quill/node_modules/quill-delta/lib/delta');
-const { collaborate } = require('./collaborate');
-const { tree } = require('./tree');
+const { collaborate } = require('./src/collaborate');
+const { tree } = require('./src/tree');
 
 // HTTP前缀
 const bizHost = config.biz.host;

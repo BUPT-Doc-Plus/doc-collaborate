@@ -1,4 +1,4 @@
-const config = require('./server.config');
+const config = require('../server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const redis = require('redis');
 const { Kafka } = require('kafkajs');
