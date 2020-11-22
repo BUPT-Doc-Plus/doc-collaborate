@@ -3,6 +3,7 @@ const { FileTree } = require("./FileTree");
 const sharedb = require("sharedb/lib/client");
 const NodeWebSocket = require("ws");
 const ReconnectingWebSocket = require("reconnecting-websocket");
+const { Path } = require("./Path");
 
 const RECONNECT_OPS = {
     connectionTimeout: 400,
@@ -49,7 +50,6 @@ class DocFileSystem {
     }
 
     get(path) {
-        path = path.split("").reduce((a, b) => (a.slice(-1) === "/" && b === "/") ? a : (a + b));
         return this.tree.indices[path] || this.tree.indices[path + "/"];
     }
 
@@ -63,6 +63,10 @@ class DocFileSystem {
             this.tree.indices[node.path] = node;
         })
         parent.children[data.label] = newNode;
+        this.doc.submitOp({
+            p: new Path(path + data.label).jpath,
+            oi: data
+        });
         return true;
     }
 
@@ -73,62 +77,28 @@ class DocFileSystem {
             this.mkdir(prevPath);
         }
         if (newDir !== "") {
-            this.get(prevPath).children[newDir] = new FileNode({
+            let data = {
                 label: newDir,
                 creator: 1,
-                children: {}
-            }, path, (node) => {
+                children: {},
+                collaborators: null,
+                show: false
+            };
+            this.get(prevPath).children[newDir] = new FileNode(data, path, (node) => {
                 this.tree.indices[node.path] = node;
             });
-        }
-        return true;
-    }
-
-    recycle(path) {
-        if (this.get(path) === undefined)
-            return false;
-        let [parent, target] = DocFileSystem.splitLast(path);
-        let rcyPath = parent + DocFileSystem.recycleTemplate.label + "/";
-        if (this.get(rcyPath) === undefined) {
-            this.get(parent).children[DocFileSystem.recycleTemplate.label] = new FileNode(DocFileSystem.recycleTemplate, rcyPath, (node) => {
-                this.tree.indices[node.path] = node;
+            this.doc.submitOp({
+                p: new Path(path.slice(0, -1)).jpath,
+                oi: data
             })
         }
-        if (this.get(rcyPath).children[target] === undefined) {
-            this.get(rcyPath).children[target] = [];
-            this.tree.indices[rcyPath + target] = this.get(rcyPath).children[target];
-        } 
-        this.get(rcyPath).children[target].push(this.get(path));
-        delete this.get(parent).children[target];
-        delete this.tree.indices[path];
         return true;
-    }
-
-    restore(path, i) {
-        if (this.get(path) === undefined)
-            return -1;
-        let flag = 0;
-        let trash = this.get(path)[i];
-        let [rcyPath, _] = DocFileSystem.splitLast(path);
-        let [oldPath, target] = DocFileSystem.splitLast(trash.path);
-        this.mkdir(oldPath);
-        this.get(oldPath).children[target] = trash;
-        if (this.tree.indices[oldPath + target] !== undefined)
-            flag = 1;
-        this.tree.indices[oldPath + target] = trash;
-        this.get(rcyPath).children[target].splice(i, 1);
-        if (this.get(rcyPath).children[target].length === 0) {
-            delete this.get(rcyPath).children[target];
-            delete this.tree.indices[rcyPath];
-        }
-        return flag;
     }
 
     remove(path) {
         if (this.get(path) === undefined)
             return false;
-        let [parent, target] = DocFileSystem.splitLast(path);
-        return delete this.get(parent).children[target] && delete this.tree.indices[path];
+        return delete this.get(path) && delete this.tree.indices[path];
     }
 
     copy(src) {
@@ -163,6 +133,19 @@ class DocFileSystem {
             this.remove(src);
         }
         return flag;
+    }
+
+    rename(path, newName) {
+        let p = new Path(path);
+        let newPath = p.parent.path + newName + (p._isDir ? "/" : "");
+        if (this.get(newPath) !== undefined)
+            return false;
+        this.tree.indices[newPath] = this.get(path);
+        this.get(path).label = newName;
+        this.get(path).path = newPath;
+        this.get(p.parent.path)[newName] = this.get(path);
+        delete this.get(path);
+        return true;
     }
 }
 
