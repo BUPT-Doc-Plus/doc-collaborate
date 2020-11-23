@@ -2,6 +2,7 @@ const config = require('../server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const redis = require('redis');
 const { sortTree } = require('./utils');
+const { FileTree } = require('./file/FileTree');
 
 // 客户端引用计数
 const clients = {};
@@ -60,7 +61,8 @@ function tree(backend, connection, ws, type, userId) {
                 }
             }
             sortTree(root);
-            doc.create(root, function () {
+            rootTree = new FileTree(root);
+            doc.create(rootTree, function () {
                 console.log(`[Loading] new ${type} tree of user ${userId} created`);
                 backend.listen(new WebSocketJSONStream(ws));
             });
