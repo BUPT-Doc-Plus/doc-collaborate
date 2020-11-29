@@ -6,8 +6,6 @@ const { FileTree } = require('./file/FileTree');
 
 // 客户端引用计数
 const clients = {};
-// 定时任务引用
-const taskRefs = {};
 // Redis
 const redisClient = redis.createClient(config.redis.port, config.redis.host);
 redisClient.auth(config.redis.auth);
