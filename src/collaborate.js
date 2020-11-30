@@ -1,16 +1,7 @@
 const config = require('../server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const redis = require('redis');
-const { Kafka } = require('kafkajs');
 
-// Kafka消息队列
-var seq = 0;
-const kafka = new Kafka({
-    clientId: 'quill-backend',
-    brokers: [config.kafka.address]
-});
-const producer = kafka.producer();
-producer.connect();
 // 客户端引用计数
 const clients = {};
 // 定时任务引用
@@ -53,26 +44,27 @@ function collaborate(backend, connection, ws, docId, userId) {
                     });
                 } else {
                     // 从业务服务器加载文档
-                    console.log(`[Loading] redis missing, loading doc ${docId} from central server`);
-                    axios.get(prefix + 'doc/delta/?docid=' + docId).then(res => {
-                        let data = res.data.data;
-                        if (data !== null) {
-                            let ops = [];
-                            for (let item of data) {
-                                ops.push(...JSON.parse(item.content).ops);
-                            }
-                            doc.create(ops, 'rich-text', function () {
-                                console.log(`[Loading] doc ${docId} loaded from central server`);
-                                backend.listen(new WebSocketJSONStream(ws));
-                            })
-                        } else {
-                            // 新建文档
-                            console.log(`[Loading] central server missing, creating new doc`);
-                            doc.create([], 'rich-text', function () {
-                                console.log('[Loading] new doc created');
-                                backend.listen(new WebSocketJSONStream(ws));
-                            });
-                        }
+                    // console.log(`[Loading] redis missing, loading doc ${docId} from central server`);
+                    // axios.get(prefix + 'doc/delta/?docid=' + docId).then(res => {
+                    //     let data = res.data.data;
+                    //     if (data !== null) {
+                    //         let ops = [];
+                    //         for (let item of data) {
+                    //             ops.push(...JSON.parse(item.content).ops);
+                    //         }
+                    //         doc.create(ops, 'rich-text', function () {
+                    //             console.log(`[Loading] doc ${docId} loaded from central server`);
+                    //             backend.listen(new WebSocketJSONStream(ws));
+                    //         })
+                    //     } else {
+                            
+                    //     }
+                    // });
+                    // 新建文档
+                    console.log(`[Loading] central server missing, creating new doc`);
+                    doc.create([], 'rich-text', function () {
+                        console.log('[Loading] new doc created');
+                        backend.listen(new WebSocketJSONStream(ws));
                     });
                 }
             })
@@ -97,23 +89,23 @@ function collaborate(backend, connection, ws, docId, userId) {
                             throw err;
                         };
                         console.log(`[Saving] doc ${docId} saved to redis`);
-                        taskRefs[docId] = setTimeout(() => {
-                            // 将文档存到后端
-                            console.log(`[Saving] sending doc ${docId} to MQ`);
-                            parseRequest().then(body => {
-                                if (body !== null) {
-                                    return producer.send({
-                                        topic: 'create-all-deltas',
-                                        messages: [{
-                                            key: (seq++).toString(),
-                                            value: body
-                                        }]
-                                    }).then(() => {
-                                        console.log(`[Saving] doc ${docId} sent to MQ`);
-                                    })
-                                }
-                            })
-                        }, config.persist.toKafka * 1000);
+                        // taskRefs[docId] = setTimeout(() => {
+                        //     // 将文档存到后端
+                        //     console.log(`[Saving] sending doc ${docId} to MQ`);
+                        //     parseRequest().then(body => {
+                        //         if (body !== null) {
+                        //             return producer.send({
+                        //                 topic: 'create-all-deltas',
+                        //                 messages: [{
+                        //                     key: (seq++).toString(),
+                        //                     value: body
+                        //                 }]
+                        //             }).then(() => {
+                        //                 console.log(`[Saving] doc ${docId} sent to MQ`);
+                        //             })
+                        //         }
+                        //     })
+                        // }, config.persist.toKafka * 1000);
                     })
                 }, config.persist.toRedis * 1000)
             }
