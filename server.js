@@ -8,6 +8,7 @@ const axios = require('axios').default;
 const Delta = require('quill/node_modules/quill-delta/lib/delta');
 const { collaborate } = require('./src/collaborate');
 const { tree } = require('./src/tree');
+const { getQueryParams } = require('./src/utils')
 
 // HTTP前缀
 const bizHost = config.biz.host;
@@ -40,11 +41,12 @@ function startServer() {
         /**
          * 客户端接入回调
          */
-        var [_, arg1, arg2, arg3] = req.url.split('/');
+        var [_, arg1, arg2, arg3] = req.url.split("?")[0].split('/');
+        var token = getQueryParams(req.url)["token"];
         if (arg1 === 'collaborate') {
-            collaborate(backend, connection, ws, arg2, arg3);
+            collaborate(backend, connection, ws, arg2, arg3, token);
         } else if (arg1 === 'tree') {
-            tree(backend, connection, ws, arg2 ,arg3);
+            tree(backend, connection, ws, arg2 ,arg3, token);
         }
     });
 
