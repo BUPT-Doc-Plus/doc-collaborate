@@ -30,13 +30,21 @@ async function tree(backend, connection, ws, type, userId, token) {
                         label: "算法",
                         show: false,
                         children: {
-                            "0": { id: 1 },
+                            "0": {
+                                label: "计算机网络",
+                                show: false,
+                                children: {
+                                    "0": { id: 2 },
+                                    "1": { id: 3 },
+                                }
+                            },
+                            "1": { id: 1 },
                         }
-                    }
+                    },
                 }
             }
+            sortTree(root);
             getDocDetail(root.children, token).then(() => {
-                sortTree(root);
                 let rootTree = new FileTree(root);
                 doc.submitOp({
                     p: [],

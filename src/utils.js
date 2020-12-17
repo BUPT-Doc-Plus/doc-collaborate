@@ -16,20 +16,19 @@ function sortTree(root) {
 async function getDocDetail(children, token, index=0) {
     let urlOf = (docId) => `http://${config.biz.host}/doc/${docId}?token=V20xV2JGcHRXWGhaZW1zd1RUSldiVTlIVFRST2FrazBUWHBDYVUxNlVUUk5WRlpzVFdwTmVVMXFWVDA9`;
     await new Promise((resolve) => {
+        console.log(children[index]);
         if (children[index].id) {
             axios.get(urlOf(children[index].id)).then((resp) => {
                 children[index] = resp.data.data;
-                console.log(resp.data.data);
                 resolve();
             }).catch((e) => {
-                console.log(e);
                 resolve();
             });
         } else {
             resolve();
         }
     });
-    let child = children[0];
+    let child = children[index];
     if (child.children) {
         await getDocDetail(child.children, token);
     }
