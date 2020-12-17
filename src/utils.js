@@ -1,3 +1,6 @@
+const config = require("../server.config");
+const axios = require("axios").default;
+
 function sortTree(root) {
     let result = {};
     Object.keys(root).sort().map(key => {
@@ -10,4 +13,39 @@ function sortTree(root) {
     }
 }
 
-module.exports = { sortTree };
+async function getDocDetail(children, token, index=0) {
+    let urlOf = (docId) => `http://${config.biz.host}/doc/${docId}?token=V20xV2JGcHRXWGhaZW1zd1RUSldiVTlIVFRST2FrazBUWHBDYVUxNlVUUk5WRlpzVFdwTmVVMXFWVDA9`;
+    await new Promise((resolve) => {
+        if (children[index].id) {
+            axios.get(urlOf(children[index].id)).then((resp) => {
+                children[index] = resp.data.data;
+                console.log(resp.data.data);
+                resolve();
+            }).catch((e) => {
+                console.log(e);
+                resolve();
+            });
+        } else {
+            resolve();
+        }
+    });
+    let child = children[0];
+    if (child.children) {
+        await getDocDetail(child.children, token);
+    }
+    if (children[index + 1]) {
+        await getDocDetail(children, token, index + 1);
+    }
+}
+
+function getQueryParams(url) {
+    var result = {};
+    var pairs = url.split("?")[1].split("&");
+    for (let pair of pairs) {
+        let [key, value] = pair.split("=");
+        result[key] = value;
+    }
+    return result;
+}
+
+module.exports = { sortTree, getDocDetail, getQueryParams };
