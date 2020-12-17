@@ -9,7 +9,7 @@ module.exports = {
         auth: '123456'
     },
     biz: {
-        host: 'monkeydoc.liadrinz.cn'
+        host: 'localhost:8000'
     },
     kafka: {
         address: '121.36.15.90:9092',
