@@ -26,16 +26,15 @@ async function tree(backend, connection, ws, type, userId, token) {
             console.log(`[Loading] memory missing, create new ${type} tree of user ${userId}`);
             let root = {
                 children: {
-                    "0": {
+                    "算法": {
                         label: "算法",
                         show: false,
                         children: {
-                            "0": {
+                            "计算机网络": {
                                 label: "计算机网络",
                                 show: false,
                                 children: {
-                                    "0": { id: 2 },
-                                    "1": { id: 3 },
+                                    "3": { id: 3 },
                                 }
                             },
                             "1": { id: 1 },

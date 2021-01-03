@@ -13,13 +13,14 @@ function sortTree(root) {
     }
 }
 
-async function getDocDetail(children, token, index=0) {
+async function getDocDetail(children, token, keyIndex=0) {
     let urlOf = (docId) => `http://${config.biz.host}/doc/${docId}?token=V20xV2JGcHRXWGhaZW1zd1RUSldiVTlIVFRST2FrazBUWHBDYVUxNlVUUk5WRlpzVFdwTmVVMXFWVDA9`;
+    let keys = Object.keys(children);
+    let key = keys[keyIndex];
     await new Promise((resolve) => {
-        console.log(children[index]);
-        if (children[index].id) {
-            axios.get(urlOf(children[index].id)).then((resp) => {
-                children[index] = resp.data.data;
+        if (children[key].id) {
+            axios.get(urlOf(children[key].id)).then((resp) => {
+                children[key] = resp.data.data;
                 resolve();
             }).catch((e) => {
                 resolve();
@@ -28,12 +29,11 @@ async function getDocDetail(children, token, index=0) {
             resolve();
         }
     });
-    let child = children[index];
-    if (child.children) {
-        await getDocDetail(child.children, token);
+    if (children[key].children) {
+        await getDocDetail(children[key].children, token);
     }
-    if (children[index + 1]) {
-        await getDocDetail(children, token, index + 1);
+    if (children[keys[keyIndex + 1]]) {
+        await getDocDetail(children, token, keyIndex + 1);
     }
 }
 
