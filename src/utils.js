@@ -16,6 +16,7 @@ function sortTree(root) {
 async function getDocDetail(children, token, keyIndex=0) {
     let urlOf = (docId) => `http://${config.biz.host}/doc/${docId}?token=V20xV2JGcHRXWGhaZW1zd1RUSldiVTlIVFRST2FrazBUWHBDYVUxNlVUUk5WRlpzVFdwTmVVMXFWVDA9`;
     let keys = Object.keys(children);
+    if (keys.length === 0) return;
     let key = keys[keyIndex];
     await new Promise((resolve) => {
         if (children[key].id) {
