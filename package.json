@@ -27,6 +27,7 @@
     "redis": "^3.0.2",
     "rich-text": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^4.1.0",
     "sharedb": "^1.4.1",
+    "sharedb-mongo": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^1.0.0-beta.15",
     "websocket": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^1.0.32",
     "ws": "^7.3.1"
   },

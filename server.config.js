@@ -8,6 +8,11 @@ module.exports = {
         port: 6379,
         auth: '123456'
     },
+    mongo: {
+        host: 'localhost',
+        port: 27017,
+        db: 'test'
+    },
     biz: {
         host: 'localhost:8000'
     },
