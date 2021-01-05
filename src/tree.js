@@ -6,18 +6,12 @@ const { getDocTree, saveDocTree } = require("./dao/DocTree");
 
 // 客户端引用计数
 const clients = {};
-const taskRefs = {};
 
 async function tree(backend, connection, ws, type, userId, token) {
     if (clients[userId] === undefined) {
         clients[userId] = 0;
     }
     ++clients[userId];
-    if (taskRefs[userId]) {
-        clearTimeout(taskRefs[userId]);
-        delete taskRefs[userId];
-        console.log(`[Canceled] saving doc tree ${userId} to db is canceled`);
-    }
     // 从ShareDB加载树
     var doc = connection.get('tree-' + type, '' + userId);
     console.log(`[Loading] loading ${type} tree of user ${userId} from memory`);
