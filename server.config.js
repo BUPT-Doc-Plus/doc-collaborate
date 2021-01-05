@@ -23,7 +23,8 @@ module.exports = {
     },
     persist: {
         toRedis: 10,
-        toKafka: 30
+        toKafka: 30,
+        toDatabase: 5,
     },
     key: 'U5MD$>kRS9zTKHN*vw{t4YOem_#,1E@Aoij(pG;u?gqXVyB^[.0LI)fC2Z:Qc<hdFxPnr!s8J%+/]7}36la&Wb'
 }
