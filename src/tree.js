@@ -7,7 +7,7 @@ const { getDocTree, saveDocTree } = require("./dao/DocTree");
 // 客户端引用计数
 const clients = {};
 
-async function tree(backend, connection, ws, type, userId, token) {
+function tree(backend, connection, ws, type, userId, token) {
     if (clients[userId] === undefined) {
         clients[userId] = 0;
     }
@@ -46,13 +46,12 @@ async function tree(backend, connection, ws, type, userId, token) {
     });
     ws.on('close', function () {
         --clients[userId];
-        console.log(`[Saving] saving doc tree ${userId} to db`);
         doc.fetch((err) => {
             if (err) throw err;
             saveDocTree(userId, JSON.stringify(doc.data.root), token).then((resp) => {
                 console.log(`[Saved] doc tree ${userId} saved to db`);
             }).catch((err) => {
-                console.err(`[Saving Failed] doc tree ${userId} failed saving to db`);
+                console.error(`[Saving Failed] doc tree ${userId} failed saving to db`);
             })
         })
     })
