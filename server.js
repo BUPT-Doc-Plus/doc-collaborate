@@ -37,7 +37,7 @@ function startServer() {
     var server = http.createServer(app);
     // 创建WebSocket服务器
     var wss = new WebSocket.Server({ server: server });
-    wss.on('connection', function(ws, req) {
+    wss.on('connection', function (ws, req) {
         /**
          * 客户端接入回调
          */
@@ -46,7 +46,7 @@ function startServer() {
         if (arg1 === 'collaborate') {
             collaborate(backend, connection, ws, arg2, arg3, token);
         } else if (arg1 === 'tree') {
-            tree(backend, connection, ws, arg2 ,arg3, token);
+            tree(backend, connection, ws, arg2, arg3, token);
         }
     });
 
@@ -76,7 +76,7 @@ function startServer() {
 
     server.listen(config.server.port, config.server.host);
     console.log(`Listening on http://${config.server.host}:${config.server.port}`);
-    process.on('uncaughtException', function(err) {
+    process.on('uncaughtException', function (err) {
         console.error(err);
     })
 }
