@@ -3,14 +3,8 @@ const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 
 // 客户端引用计数
 const clients = {};
-// 定时任务引用
-const taskRefs = {};
 
-function collaborate(backend, connection, ws, docId, userId, token) {
-    // 接入时取消之前的定时任务
-    if (taskRefs[docId]) {
-        clearTimeout(taskRefs[docId]);
-    }
+function collaborate(backend, connection, ws, docId, userId, token, type="rich-text") {
     // 引用计数+1
     if (clients[docId] === undefined) {
         clients[docId] = [];
@@ -28,10 +22,17 @@ function collaborate(backend, connection, ws, docId, userId, token) {
             backend.listen(new WebSocketJSONStream(ws));
         } else {
             // 新建文档
-            doc.create([], 'rich-text', function () {
-                console.log('[Loading] new doc created');
-                backend.listen(new WebSocketJSONStream(ws));
-            });
+            if (type === "rich-text") {
+                doc.create([], 'rich-text', function () {
+                    console.log('[Loading] new doc (rich-text) created');
+                    backend.listen(new WebSocketJSONStream(ws));
+                });
+            } else if (type === "markdown") {
+                doc.create("", "text", function () {
+                    console.log('[Loading] new doc (markdown) created');
+                    backend.listen(new WebSocketJSONStream(ws));
+                });
+            }
         }
     });
     ws.on('error', function (err) {

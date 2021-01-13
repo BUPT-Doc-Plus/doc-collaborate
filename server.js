@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express');
 const ShareDB = require('sharedb');
 const richText = require('rich-text');
+const otText = require('ot-text');
 const WebSocket = require('ws');
 const axios = require('axios').default;
 const Delta = require('quill/node_modules/quill-delta/lib/delta');
@@ -17,6 +18,7 @@ const prefix = 'http://' + bizHost + '/';
 const backend = new ShareDB();
 const connection = backend.connect();
 ShareDB.types.register(richText.type);
+ShareDB.types.register(otText.type);
 
 // 启动服务器
 startServer();
@@ -43,8 +45,8 @@ function startServer() {
          */
         var [_, arg1, arg2, arg3] = req.url.split("?")[0].split('/');
         var token = getQueryParams(req.url)["token"];
-        if (arg1 === 'collaborate') {
-            collaborate(backend, connection, ws, arg2, arg3, token);
+        if (arg1 === 'rich-text' || arg1 === 'markdown') {
+            collaborate(backend, connection, ws, arg2, arg3, token, arg1);
         } else if (arg1 === 'tree') {
             tree(backend, connection, ws, arg2, arg3, token);
         }
