@@ -13,34 +13,45 @@ function sortTree(root) {
     }
 }
 
-async function getDocDetail(children, token, keyIndex=0) {
+function countDocInTree(children) {
+    let r = 0;
+    for (let key in children) {
+        if (children[key].children) {
+            r += countDocInTree(children[key].children);
+        } else {
+            r += 1;
+        }
+    }
+    return r;
+}
+
+function getDocDetail(children, token, path, keyIndex=0, eachCallback = (p, content, success) => {}) {
     let urlOf = (docId) => `http://${config.biz.host}/doc/${docId}?token=${token}`;
     let keys = Object.keys(children);
     if (keys.length === 0) return;
     let key = keys[keyIndex];
-    await new Promise((resolve) => {
-        if (children[key].id) {
-            axios.get(urlOf(children[key].id)).then((resp) => {
-                children[key] = resp.data.data;
-                resolve();
-            }).catch((e) => {
-                resolve();
-            });
-        } else {
-            resolve();
-        }
-    });
+    if (children[key].id) {
+        axios.get(urlOf(children[key].id)).then((resp) => {
+            resp.data.data.path = children[key].path;
+            children[key] = resp.data.data;
+            eachCallback(path.concat(key), resp.data.data, true);
+        }).catch((err) => {
+            eachCallback(path.concat(key), children[key], false);
+        })
+    }
     if (children[key].children) {
-        await getDocDetail(children[key].children, token);
+        getDocDetail(children[key].children, token, path.concat([key, "children"]), 0, eachCallback);
     }
     if (children[keys[keyIndex + 1]]) {
-        await getDocDetail(children, token, keyIndex + 1);
+        getDocDetail(children, token, path, keyIndex + 1, eachCallback);
     }
 }
 
 function getQueryParams(url) {
     var result = {};
-    var pairs = url.split("?")[1].split("&");
+    var half = url.split("?")[1]
+    if (half === undefined) return result;
+    var pairs = half.split("&");
     for (let pair of pairs) {
         let [key, value] = pair.split("=");
         result[key] = value;
@@ -48,4 +59,4 @@ function getQueryParams(url) {
     return result;
 }
 
-module.exports = { sortTree, getDocDetail, getQueryParams };
+module.exports = { sortTree, getDocDetail, getQueryParams, countDocInTree };

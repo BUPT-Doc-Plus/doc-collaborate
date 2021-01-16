@@ -1,6 +1,6 @@
 const config = require('../server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
-const { sortTree, getDocDetail } = require('./utils');
+const { sortTree, getDocDetail, countDocInTree } = require('./utils');
 const { FileTree } = require('./file/FileTree');
 const { getDocTree, saveDocTree } = require("./dao/DocTree");
 
@@ -26,15 +26,46 @@ function tree(backend, connection, ws, type, userId, token) {
             let root = resp.data.data.content;
             root = JSON.parse(root);
             sortTree(root);
-            return root;
-        }).then((root) => {
-            getDocDetail(root.children, token).then(() => {
-                rootTree = new FileTree(root);
+            rootTree = new FileTree(root);
+            doc.submitOp({
+                p: [],
+                oi: rootTree
+            });
+            var docsInTree = countDocInTree(root.children);
+            var count = docsInTree;
+            console.log(count);
+            if (count === 0) {
                 doc.submitOp({
-                    p: [],
-                    oi: rootTree
-                });
-            })
+                    p: ["loaded"],
+                    oi: true
+                })
+            } else {
+                getDocDetail(root.children, token, ["root", "children"], 0, (p, content, success) => {
+                    if (!success) {
+                        // 文件已因为种种原因失效，直接移除
+                        doc.submitOp({
+                            p,
+                            od: content
+                        })
+                    } else {
+                        doc.submitOp({
+                            p,
+                            od: content,
+                            oi: content
+                        })
+                    }
+                    doc.submitOp({
+                        p: ["loaded"],
+                        oi: 1 - count / docsInTree
+                    })
+                    if (--count === 0) {
+                        doc.submitOp({
+                            p: ["loaded"],
+                            oi: true
+                        })
+                    }
+                })
+            }
         })
         doc.create(rootTree, function () {
             console.log(`[Loading] new ${type} tree of user ${userId} created`);
