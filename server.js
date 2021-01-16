@@ -9,6 +9,7 @@ const axios = require('axios').default;
 const Delta = require('quill/node_modules/quill-delta/lib/delta');
 const { collaborate } = require('./src/collaborate');
 const { tree } = require('./src/tree');
+const { login } = require('./src/login');
 const { getQueryParams } = require('./src/utils')
 
 // HTTP前缀
@@ -28,14 +29,14 @@ function startServer() {
     var app = express();
     app.use(express.static('static'));
     app.use(express.static('node_modules/quill/dist'));
-    app.get('/fullArticle:docId?', (req, res) => {
-        getDeltasByDocId(req.query.docId, true).then(history => {
-            let text = history.filter(op => typeof op.insert === 'string')
-                .map(op => op.insert)
-                .join('');
-            res.send(text);
-        })
-    })
+    // app.get('/fullArticle:docId?', (req, res) => {
+    //     getDeltasByDocId(req.query.docId, true).then(history => {
+    //         let text = history.filter(op => typeof op.insert === 'string')
+    //             .map(op => op.insert)
+    //             .join('');
+    //         res.send(text);
+    //     })
+    // })
     var server = http.createServer(app);
     // 创建WebSocket服务器
     var wss = new WebSocket.Server({ server: server });
@@ -49,33 +50,10 @@ function startServer() {
             collaborate(backend, connection, ws, arg2, arg3, token, arg1);
         } else if (arg1 === 'tree') {
             tree(backend, connection, ws, arg2, arg3, token);
+        } else if (arg1 === 'login') {
+            login(ws, arg2);
         }
     });
-
-    /**
-     * 根据文档ID获取变更
-     * @param {文档ID} docId 
-     */
-    function getDeltasByDocId(docId, userFree = false) {
-        return axios.get(prefix + 'doc/delta/?docid=' + docId).then(res => {
-            let deltas = res.data.data;
-            if (deltas === null) deltas = [];
-            let history = new Delta();
-            if (userFree) {
-                for (let delta of deltas) {
-                    let d = JSON.parse(delta.content);
-                    delete d.attributes;
-                    history = history.compose(JSON.parse(delta.content));
-                }
-            } else {
-                for (let delta of deltas) {
-                    history = history.compose(JSON.parse(delta.content));
-                }
-            }
-            return history;
-        })
-    }
-
     server.listen(config.server.port, config.server.host);
     console.log(`Listening on http://${config.server.host}:${config.server.port}`);
     process.on('uncaughtException', function (err) {
