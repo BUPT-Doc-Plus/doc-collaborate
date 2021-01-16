@@ -1,5 +1,6 @@
 const config = require('../server.config');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
+const { readable, writable } = require('./login');
 
 // 客户端引用计数
 const clients = {};
@@ -17,22 +18,33 @@ function collaborate(backend, connection, ws, docId, userId, token, type="rich-t
         if (err) {
             throw err;
         }
+        let stream = new WebSocketJSONStream(ws);
+        if ((!readable[userId] || !readable[userId][docId]) && (!writable[userId] || !writable[userId][docId])) {
+            return;
+        }
+        if (!writable[userId] || !writable[userId][docId]) {
+            let onmessage = ws.onmessage;
+            ws.onmessage = (e) => {
+                let data = JSON.parse(e.data);
+                if (data.a === "hs") {
+                    // 允许握手消息
+                    onmessage(e);
+                } else {
+                    // 第一次必需的操作消息发送后，不再允许操作消息
+                    onmessage(e);
+                    ws.onmessage = () => {};
+                }
+            }
+        }
         if (doc.type !== null) {
             console.log(`[Loading] doc ${docId} loaded from memory`);
-            backend.listen(new WebSocketJSONStream(ws));
+            backend.listen(stream);
         } else {
             // 新建文档
-            if (type === "rich-text") {
-                doc.create([], 'rich-text', function () {
-                    console.log('[Loading] new doc (rich-text) created');
-                    backend.listen(new WebSocketJSONStream(ws));
-                });
-            } else if (type === "markdown") {
-                doc.create("", "text", function () {
-                    console.log('[Loading] new doc (markdown) created');
-                    backend.listen(new WebSocketJSONStream(ws));
-                });
-            }
+            doc.create([], 'rich-text', function () {
+                console.log('[Loading] new doc (rich-text) created');
+                backend.listen(stream);
+            });
         }
     });
     ws.on('error', function (err) {
