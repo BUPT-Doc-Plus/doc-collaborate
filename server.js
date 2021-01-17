@@ -10,7 +10,9 @@ const Delta = require('quill/node_modules/quill-delta/lib/delta');
 const { collaborate } = require('./src/collaborate');
 const { tree } = require('./src/tree');
 const { login } = require('./src/login');
+const { biz } = require('./src/biz');
 const { getQueryParams } = require('./src/utils')
+const bodyParser = require('body-parser');
 
 // HTTP前缀
 const bizHost = config.biz.host;
@@ -29,14 +31,8 @@ function startServer() {
     var app = express();
     app.use(express.static('static'));
     app.use(express.static('node_modules/quill/dist'));
-    // app.get('/fullArticle:docId?', (req, res) => {
-    //     getDeltasByDocId(req.query.docId, true).then(history => {
-    //         let text = history.filter(op => typeof op.insert === 'string')
-    //             .map(op => op.insert)
-    //             .join('');
-    //         res.send(text);
-    //     })
-    // })
+    app.use(bodyParser.urlencoded({ extended: false }));
+    biz(app);
     var server = http.createServer(app);
     // 创建WebSocket服务器
     var wss = new WebSocket.Server({ server: server });
