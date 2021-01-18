@@ -3,15 +3,15 @@ const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const { sortTree, getDocDetail, countDocInTree } = require('./utils');
 const { FileTree } = require('./file/FileTree');
 const { getDocTree, saveDocTree } = require("./dao/DocTree");
+const { Path } = require('./file/Path');
 
 // 客户端引用计数
 const clients = {};
 
 function tree(backend, connection, ws, type, userId, token) {
     if (clients[userId] === undefined) {
-        clients[userId] = 0;
+        clients[userId] = [];
     }
-    ++clients[userId];
     // 从ShareDB加载树
     var doc = connection.get('tree-' + type, '' + userId);
     console.log(`[Loading] loading ${type} tree of user ${userId} from memory`);
@@ -19,6 +19,7 @@ function tree(backend, connection, ws, type, userId, token) {
         if (err) {
             throw err;
         }
+        clients[userId].push(doc);
         // 新建树
         var rootTree = {};
         console.log(`[Loading] memory missing, create new ${type} tree of user ${userId}`);
@@ -41,18 +42,39 @@ function tree(backend, connection, ws, type, userId, token) {
                 })
             } else {
                 getDocDetail(root.children, token, ["root", "children"], 0, (p, content, success) => {
+                    let path = new Path("/");
+                    path.jpath = p.slice(1);
                     if (!success) {
                         // 文件已因为种种原因失效，直接移除
-                        doc.submitOp({
-                            p,
-                            od: content
-                        })
+                        doc.submitOp([
+                            {
+                                p,
+                                od: content
+                            },
+                            {
+                                p: ["indices", path.path],
+                                od: content
+                            },
+                            {
+                                p: ["idPath", content.id],
+                                od: path.path
+                            }
+                        ])
                     } else {
-                        doc.submitOp({
-                            p,
-                            od: content,
-                            oi: content
-                        })
+                        doc.submitOp([
+                            {
+                                p,
+                                oi: content
+                            },
+                            {
+                                p: ["indices", path.path],
+                                oi: content
+                            },
+                            {
+                                p: ["idPath", content.id],
+                                oi: path.path
+                            }
+                        ])
                     }
                     doc.submitOp({
                         p: ["loaded"],
@@ -76,7 +98,7 @@ function tree(backend, connection, ws, type, userId, token) {
         throw err;
     });
     ws.on('close', function () {
-        --clients[userId];
+        clients[userId].splice(clients[userId].indexOf(doc), 1);
         doc.fetch((err) => {
             if (err) throw err;
             saveDocTree(userId, JSON.stringify(doc.data.root), token).then((resp) => {
@@ -88,4 +110,4 @@ function tree(backend, connection, ws, type, userId, token) {
     })
 }
 
-module.exports = { tree };
+module.exports = { tree, clients };
