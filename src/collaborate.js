@@ -10,9 +10,9 @@ function collaborate(backend, connection, ws, docId, userId, token, type="rich-t
     if (clients[docId] === undefined) {
         clients[docId] = [];
     }
-    clients[docId].push(userId);
     // 从ShareDB加载文档
     var doc = connection.get('document', '' + docId);
+    clients[docId].push(doc);
     console.log(`[Loading] loading doc ${docId} from memory`);
     doc.fetch(function (err) {
         if (err) {
@@ -52,7 +52,7 @@ function collaborate(backend, connection, ws, docId, userId, token, type="rich-t
     });
     ws.on('close', function () {
         // 引用计数-1
-        clients[docId].splice(clients[docId].indexOf(userId), 1);
+        clients[docId].splice(clients[docId].indexOf(doc), 1);
         doc.fetch((err) => {
             if (err) {
                 throw err;
