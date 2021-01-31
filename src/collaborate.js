@@ -5,6 +5,28 @@ const { readable, writable } = require('./login');
 // 客户端引用计数
 const clients = {};
 
+function checkPermission(ws, userId, docId) {
+    if ((!readable[userId] || !readable[userId][docId]) && (!writable[userId] || !writable[userId][docId])) {
+        ws.close()
+        return false;
+    }
+    if (!writable[userId] || !writable[userId][docId]) {
+        let onmessage = ws.onmessage;
+        ws.onmessage = (e) => {
+            let data = JSON.parse(e.data);
+            if (data.a === "hs") {
+                // 允许握手消息
+                onmessage(e);
+            } else {
+                // 第一次必需的操作消息发送后，不再允许操作消息
+                onmessage(e);
+                ws.onmessage = () => {};
+            }
+        }
+    }
+    return true;
+}
+
 function collaborate(backend, connection, ws, docId, userId, token, type="rich-text") {
     // 引用计数+1
     if (clients[docId] === undefined) {
@@ -19,22 +41,8 @@ function collaborate(backend, connection, ws, docId, userId, token, type="rich-t
             throw err;
         }
         let stream = new WebSocketJSONStream(ws);
-        if ((!readable[userId] || !readable[userId][docId]) && (!writable[userId] || !writable[userId][docId])) {
+        if (!checkPermission(ws, userId, docId)) {
             return;
-        }
-        if (!writable[userId] || !writable[userId][docId]) {
-            let onmessage = ws.onmessage;
-            ws.onmessage = (e) => {
-                let data = JSON.parse(e.data);
-                if (data.a === "hs") {
-                    // 允许握手消息
-                    onmessage(e);
-                } else {
-                    // 第一次必需的操作消息发送后，不再允许操作消息
-                    onmessage(e);
-                    ws.onmessage = () => {};
-                }
-            }
         }
         if (doc.type !== null) {
             console.log(`[Loading] doc ${docId} loaded from memory`);
@@ -46,6 +54,9 @@ function collaborate(backend, connection, ws, docId, userId, token, type="rich-t
                 backend.listen(stream);
             });
         }
+        doc.on("op", (op, source) => {
+            checkPermission(ws, userId, docId)
+        })
     });
     ws.on('error', function (err) {
         throw err;

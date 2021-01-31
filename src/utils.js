@@ -33,8 +33,8 @@ function getDocDetail(children, token, path, keyIndex=0, eachCallback = (p, cont
     if (children[key].id) {
         axios.get(urlOf(children[key].id)).then((resp) => {
             resp.data.data.path = children[key].path;
-            children[key] = resp.data.data;
-            eachCallback(path.concat(key), resp.data.data, true);
+            Object.assign(children[key], resp.data.data);
+            eachCallback(path.concat(key), children[key], true);
         }).catch((err) => {
             eachCallback(path.concat(key), children[key], false);
         })
