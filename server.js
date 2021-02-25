@@ -13,12 +13,14 @@ const { login } = require('./src/login');
 const { biz } = require('./src/biz');
 const { getQueryParams } = require('./src/utils')
 const bodyParser = require('body-parser');
+const { chat } = require('./src/chat');
+const db = require("sharedb-mongo")(`mongodb://${config.mongo.host}:${config.mongo.port}/${config.mongo.db}`, { useUnifiedTopology: true });
 
 // HTTP前缀
 const bizHost = config.biz.host;
 const prefix = 'http://' + bizHost + '/';
 // ShareDB
-const backend = new ShareDB();
+const backend = new ShareDB({ db });
 const connection = backend.connect();
 ShareDB.types.register(richText.type);
 ShareDB.types.register(otText.type);
@@ -48,6 +50,8 @@ function startServer() {
             tree(backend, connection, ws, arg2, arg3, token);
         } else if (arg1 === 'login') {
             login(ws, arg2);
+        } else if (arg1 === 'chat') {
+            chat(ws, arg2, token);
         }
     });
     server.listen(config.server.port, config.server.host);

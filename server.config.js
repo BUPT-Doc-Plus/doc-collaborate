@@ -11,7 +11,7 @@ module.exports = {
     mongo: {
         host: 'localhost',
         port: 27017,
-        db: 'test'
+        db: 'docs'
     },
     biz: {
         host: 'localhost:8000'
