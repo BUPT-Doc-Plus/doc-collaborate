@@ -14,13 +14,13 @@ const { biz } = require('./src/biz');
 const { getQueryParams } = require('./src/utils')
 const bodyParser = require('body-parser');
 const { chat } = require('./src/chat');
-const db = require("sharedb-mongo")(`mongodb://${config.mongo.host}:${config.mongo.port}/${config.mongo.db}`, { useUnifiedTopology: true });
+// const db = require("sharedb-mongo")(`mongodb://${config.mongo.host}:${config.mongo.port}/${config.mongo.db}`, { useUnifiedTopology: true });
 
 // HTTP前缀
 const bizHost = config.biz.host;
 const prefix = 'http://' + bizHost + '/';
 // ShareDB
-const backend = new ShareDB({ db });
+const backend = new ShareDB();
 const connection = backend.connect();
 ShareDB.types.register(richText.type);
 ShareDB.types.register(otText.type);
