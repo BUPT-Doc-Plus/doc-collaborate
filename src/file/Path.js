@@ -57,6 +57,12 @@ class Path {
     return this._target;
   }
 
+  set target(target) {
+    this._target = target;
+    this._path = this._parent + target + (this._isDir ? "/" : "");
+    this._jsonPath = this._getJPath(this._path);
+  }
+
   get jpath() {
     return this._jsonPath;
   }

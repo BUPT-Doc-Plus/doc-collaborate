@@ -1,8 +1,42 @@
+const config = require("../server.config");
 const { readable, writable, push, remove, clients } = require("./login");
 const treeDocs = require("./tree").clients;
 const { Path } = require("./file/Path");
+const MongoClient = require("mongodb").MongoClient;
 
-function biz(app) {
+function biz(app, connection) {
+    let url = `mongodb://${config.mongo.user}:${config.mongo.pwd}@${config.mongo.host}:${config.mongo.port}/${config.mongo.db}?authSource=admin`;
+    MongoClient.connect(url, function(err, db) {
+        if (err) throw err;
+        let db_doc = db.db("docs");
+        app.get("/meta", (req, res) => {
+            let doc_id = req.query.doc_id;
+            db_doc.collection("document").find({_id: doc_id}, {projection: {_m: 1}}).toArray(function (err, result) {
+                if (err) {
+                    res.send(err);
+                }
+                res.send(result[0]);
+            })
+        })
+        app.get("/full-text", (req, res) => {
+            var doc = connection.get('document', '' + req.query.doc_id);
+            doc.fetch((err) => {
+                if (err) {
+                    res.send(err);
+                    throw err;
+                }
+                if (doc.data === undefined) {
+                    res.send("");
+                    return;
+                }
+                let ops = doc.data.ops;
+                let text = ops.filter(op => typeof op.insert === 'string')
+                    .map(op => op.insert)
+                    .join('');
+                res.send(text);
+            })
+        })
+    })
     app.post("/access_change", (req, res) => {
         let data = JSON.parse(req.body.data);
         if (data.role === 0) {
@@ -34,10 +68,6 @@ function biz(app) {
                                 oi: data.doc
                             },
                             {
-                                p: ["indices", p.path],
-                                oi: data.doc
-                            },
-                            {
                                 p: ["idPath", data.doc.id],
                                 oi: p.path
                             }
@@ -49,10 +79,6 @@ function biz(app) {
                         tDoc.submitOp([
                             {
                                 p: ["root", ...p.jpath],
-                                od: data.doc
-                            },
-                            {
-                                p: ["indices", p.path],
                                 od: data.doc
                             },
                             {

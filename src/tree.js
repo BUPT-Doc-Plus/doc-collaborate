@@ -52,10 +52,6 @@ function tree(backend, connection, ws, type, userId, token) {
                                 od: content
                             },
                             {
-                                p: ["indices", path.path],
-                                od: content
-                            },
-                            {
                                 p: ["idPath", content.id],
                                 od: path.path
                             }
@@ -64,10 +60,6 @@ function tree(backend, connection, ws, type, userId, token) {
                         doc.submitOp([
                             {
                                 p,
-                                oi: content
-                            },
-                            {
-                                p: ["indices", path.path],
                                 oi: content
                             },
                             {

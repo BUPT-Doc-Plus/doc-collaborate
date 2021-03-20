@@ -9,9 +9,11 @@ module.exports = {
         auth: '123456'
     },
     mongo: {
-        host: 'localhost',
+        host: 'www.liadrinz.cn',
         port: 27017,
-        db: 'docs'
+        db: 'docs',
+        user: "admin",
+        pwd: "077925"
     },
     biz: {
         host: 'localhost:8000'

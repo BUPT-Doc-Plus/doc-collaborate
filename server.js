@@ -14,13 +14,17 @@ const { biz } = require('./src/biz');
 const { getQueryParams } = require('./src/utils')
 const bodyParser = require('body-parser');
 const { chat } = require('./src/chat');
-// const db = require("sharedb-mongo")(`mongodb://${config.mongo.host}:${config.mongo.port}/${config.mongo.db}`, { useUnifiedTopology: true });
+const db = require("sharedb-mongo")(
+    `mongodb://${config.mongo.user}:${config.mongo.pwd}@${config.mongo.host}:${config.mongo.port}/${config.mongo.db}?authSource=admin`,
+    {
+        useUnifiedTopology: true
+    });
 
 // HTTP前缀
 const bizHost = config.biz.host;
 const prefix = 'http://' + bizHost + '/';
 // ShareDB
-const backend = new ShareDB();
+const backend = new ShareDB({ db });
 const connection = backend.connect();
 ShareDB.types.register(richText.type);
 ShareDB.types.register(otText.type);
@@ -34,7 +38,7 @@ function startServer() {
     app.use(express.static('static'));
     app.use(express.static('node_modules/quill/dist'));
     app.use(bodyParser.urlencoded({ extended: false }));
-    biz(app);
+    biz(app, connection);
     var server = http.createServer(app);
     // 创建WebSocket服务器
     var wss = new WebSocket.Server({ server: server });

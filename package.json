@@ -21,6 +21,7 @@
     "kafka": "^0.2.3",
     "kafkajs": "^1.12.0",
     "mocha": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^8.2.1",
+    "mongoose": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^5.12.1",
     "mysql": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^2.18.1",
     "ot-text": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^1.0.2",
     "ot-text-tp2": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^1.0.0",
