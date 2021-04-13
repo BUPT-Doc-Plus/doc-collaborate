@@ -18,6 +18,7 @@
     "depd": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^2.0.0",
     "express": "^4.17.1",
     "filer": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^1.2.0",
+    "ini": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^2.0.0",
     "kafka": "^0.2.3",
     "kafkajs": "^1.12.0",
     "mocha": "D:\\github\\BUPT-Doc-Plus\\doc-collaborate>\"D:\\nodejs\\\\node.exe\"  \"D:\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" config get save-prefix \r\n^8.2.1",

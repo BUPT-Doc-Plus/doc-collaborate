@@ -1,32 +1,22 @@
+const fs = require("fs")
+const ini = require("ini")
+
+var info = ini.parse(fs.readFileSync("../config.ini", "utf-8"))
+
 module.exports = {
     server: {
-        host: '0.0.0.0',
-        port: 8088
-    },
-    redis: {
-        host: 'www.liadrinz.cn',
-        port: 6379,
-        auth: '123456'
+        host: info["doc-collaborate"]["host"],
+        port: parseInt(info["doc-collaborate"]["port"])
     },
     mongo: {
-        host: 'www.liadrinz.cn',
-        port: 27017,
-        db: 'docs',
-        user: "admin",
-        pwd: "077925"
+        host: info["mongodb"]["host"],
+        port: parseInt(info["mongodb"]["port"]),
+        db: info["mongodb"]["db"],
+        user: info["mongodb"]["user"],
+        pwd: info["mongodb"]["pwd"]
     },
     biz: {
-        host: 'localhost:8000'
-    },
-    kafka: {
-        address: '121.36.15.90:9092',
-        groupId: 'monkeydoc-edition',
-        topics: ['re-create-all-deltas', 're-create-all-message', 're-create-checkpoint']
-    },
-    persist: {
-        toRedis: 10,
-        toKafka: 30,
-        toDatabase: 5,
+        host: `${info["doc-server"]["host"]}:${info["doc-server"]["port"]}`
     },
     key: 'U5MD$>kRS9zTKHN*vw{t4YOem_#,1E@Aoij(pG;u?gqXVyB^[.0LI)fC2Z:Qc<hdFxPnr!s8J%+/]7}36la&Wb'
 }
