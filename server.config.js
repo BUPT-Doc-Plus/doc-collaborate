@@ -5,7 +5,7 @@ var info = ini.parse(fs.readFileSync("../config.ini", "utf-8"))
 
 module.exports = {
     server: {
-        host: info["doc-collaborate"]["host"],
+        host: "0.0.0.0",
         port: parseInt(info["doc-collaborate"]["port"])
     },
     mongo: {
